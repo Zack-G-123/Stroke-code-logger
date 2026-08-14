@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f766e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Stroke Logger" />
+  <title>Stroke Code Logger</title>
+  <style>
+    :root{
+      --bg:#f4f7f7;--card:#fff;--ink:#122127;--muted:#63717a;--line:#d8e1e3;
+      --accent:#0f766e;--accent2:#115e59;--danger:#b42318;--warn:#8a5b00;
+      --shadow:0 10px 28px rgba(18,33,39,.08);--radius:18px;
+    }
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#eef7f6 0,var(--bg) 260px);color:var(--ink);min-height:100vh}
+    button,input,select,textarea{font:inherit}
+    button{-webkit-tap-highlight-color:transparent}
+    .app{max-width:760px;margin:0 auto;padding:18px 16px calc(34px + env(safe-area-inset-bottom))}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .brand{font-weight:800;letter-spacing:-.02em;font-size:1.15rem}
+    .pill{background:#dff3f0;color:var(--accent2);padding:7px 10px;border-radius:999px;font-size:.8rem;font-weight:700}
+    .pill.warn{background:#fff2d5;color:#7a5100}
+    .screen{display:none}.screen.active{display:block}
+    .hero{padding:24px 2px 8px}.hero h1{margin:0 0 8px;font-size:2rem;letter-spacing:-.04em}.hero p{margin:0;color:var(--muted);line-height:1.5}
+    .home-actions{display:grid;gap:14px;margin-top:26px}
+    .big-btn{border:none;border-radius:20px;padding:22px;text-align:left;cursor:pointer;box-shadow:var(--shadow)}
+    .big-btn.primary{background:var(--accent);color:white}.big-btn.secondary{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+    .big-btn .title{font-size:1.15rem;font-weight:800;display:block;margin-bottom:5px}.big-btn .sub{opacity:.78;font-size:.92rem}
+    .section-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px 0}
+    .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.section-title{margin:0;font-size:1.05rem;font-weight:800}.section-sub{margin:4px 0 0;color:var(--muted);font-size:.86rem}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid.one{grid-template-columns:1fr}.span-2{grid-column:1/-1}
+    label{display:block;font-size:.84rem;font-weight:700;margin-bottom:6px;color:#304047}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:#fbfcfc;color:var(--ink);outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(15,118,110,.12)}
+    .bp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .segmented{display:grid;grid-template-columns:1fr 1fr;gap:8px}.segmented button{border:1px solid var(--line);background:#fbfcfc;padding:11px;border-radius:12px;font-weight:800;cursor:pointer;color:#44535a}.segmented button.active{background:#dff3f0;color:var(--accent2);border-color:#87c9c1}
+    .conditional{display:none;margin-top:12px}.conditional.show{display:block}
+    .draft-badge{display:inline-flex;align-items:center;border-radius:999px;padding:6px 9px;background:#fff2d5;color:#7a5100;font-size:.72rem;font-weight:900;white-space:nowrap}.draft-badge.hidden{display:none}
+    .draft-card{margin:14px 0 2px;padding:14px;border:1px solid #ecd38b;background:#fffaf0;border-radius:16px}.draft-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.draft-card-title{font-weight:900}.draft-card-meta{color:var(--muted);font-size:.8rem;margin-top:3px;line-height:1.4}.draft-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+    .subsection{margin-top:14px;padding-top:13px;border-top:1px solid #edf1f2}.subsection-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}.subsection-head label{margin:0}.add-row-btn{border:1px solid #b8d7d3;background:#f2fbfa;color:var(--accent2);border-radius:10px;padding:8px 10px;font-size:.78rem;font-weight:900;cursor:pointer}.entry-list{display:grid;gap:9px}.entry-row{border:1px solid #e2e9ea;border-radius:13px;background:#fbfcfc;padding:10px}.entry-row-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.entry-context{margin-top:8px}.entry-actions{display:flex;justify-content:flex-end;margin-top:7px}.remove-row-btn{border:none;background:transparent;color:var(--danger);font-size:.76rem;font-weight:900;padding:4px;cursor:pointer}
+    .pmhx-block{margin-top:12px;padding-top:12px;border-top:1px solid #edf1f2}.pmhx-label-row{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:8px}.pmhx-label-row span{font-size:.75rem;color:var(--muted)}
+    .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}.chip{border:1px solid var(--line);background:#fbfcfc;color:#42545c;border-radius:999px;padding:8px 11px;font-size:.8rem;font-weight:800;cursor:pointer}.chip.active{background:#dff3f0;color:var(--accent2);border-color:#87c9c1}
+    .nih-item{padding:13px 0;border-top:1px solid #edf1f2}.nih-item:first-of-type{border-top:none;padding-top:0}.nih-label{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:7px}.nih-label strong{font-size:.92rem}.nih-label span{color:var(--muted);font-size:.8rem}
+    .score-badge{background:#e8f2f2;color:var(--accent2);border-radius:999px;padding:8px 11px;font-weight:900;min-width:60px;text-align:center;white-space:nowrap}
+    .nih-tools{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.tool-btn{border:1px solid #b8d7d3;background:#f2fbfa;color:var(--accent2);border-radius:10px;padding:8px 10px;font-size:.8rem;font-weight:800;cursor:pointer}.tool-btn.secondary{border-color:var(--line);background:#fff;color:#42545c}
+    .spanish-panel{display:none;margin-top:10px;border:1px solid #d7e7e5;border-radius:14px;background:#f9fcfc;padding:12px}.spanish-panel.show{display:block}.spanish-head{font-size:.84rem;font-weight:900;margin-bottom:9px}.command-list{display:grid;gap:9px}.command{border-top:1px solid #e6eeee;padding-top:9px}.command:first-child{border-top:none;padding-top:0}.command-en{color:var(--muted);font-size:.76rem;font-weight:700;margin-bottom:3px}.command-es{font-size:1rem;font-weight:800;line-height:1.4}.lang-note{margin:10px 0 0;color:var(--muted);font-size:.72rem;line-height:1.4}
+    .sticky-save{position:sticky;bottom:0;padding-top:12px;background:linear-gradient(180deg,rgba(244,247,247,0),rgba(244,247,247,.96) 22%,rgba(244,247,247,1))}.save-btn{width:100%;border:none;border-radius:16px;padding:15px;background:var(--accent);color:white;font-weight:900;cursor:pointer;box-shadow:0 8px 20px rgba(15,118,110,.25)}
+    .back-btn{border:none;background:transparent;color:var(--accent2);font-weight:800;padding:6px 0;cursor:pointer}.timestamp{color:var(--muted);font-size:.88rem}
+    .record{padding:14px 0;border-top:1px solid #edf1f2}.record:first-child{border-top:none}.record-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.record-title{font-weight:800}.record-meta{color:var(--muted);font-size:.84rem;margin-top:3px}.record-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.small-btn{border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px 11px;font-weight:800;cursor:pointer}.small-btn.edit{color:var(--accent2);border-color:#b8d7d3;background:#f5fbfa}.small-btn.danger{color:var(--danger)}.empty{color:var(--muted);text-align:center;padding:26px 10px}.details{margin-top:10px;padding:12px;background:#f8fbfb;border-radius:12px;font-size:.86rem;line-height:1.5;display:none;white-space:pre-wrap}.details.show{display:block}
+    .notice{font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.45}.storage-warning{display:none;margin-top:14px;padding:11px 12px;background:#fff7e5;color:#79520b;border:1px solid #ecd38b;border-radius:12px;font-size:.78rem;line-height:1.45}.storage-warning.show{display:block}.attribution{margin-top:30px;text-align:center;color:#849097;font-size:.69rem;letter-spacing:.02em;opacity:.72}
+    .toast{position:fixed;z-index:4000;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,16px);background:rgba(18,33,39,.94);color:white;border-radius:999px;padding:10px 15px;font-size:.84rem;font-weight:800;box-shadow:0 8px 24px rgba(18,33,39,.24);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;max-width:calc(100vw - 32px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.toast.error{background:rgba(180,35,24,.96)}
+    .confirm-overlay{display:none;position:fixed;inset:0;z-index:3500;background:rgba(18,33,39,.42);padding:18px;align-items:center;justify-content:center}.confirm-overlay.show{display:flex}.confirm-card{width:min(92vw,390px);background:white;border-radius:20px;padding:20px;box-shadow:0 24px 70px rgba(18,33,39,.28)}.confirm-card h3{margin:0 0 7px;font-size:1.12rem}.confirm-card p{margin:0;color:var(--muted);font-size:.88rem;line-height:1.45}.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.confirm-actions button{border:none;border-radius:12px;padding:12px;font-weight:900;cursor:pointer}.confirm-cancel{background:#eef2f2;color:#34464d}.confirm-delete{background:var(--danger);color:white}
+    .resource-modal{display:none;position:fixed;inset:0;z-index:1000;background:#f4f7f7}.resource-modal.show{display:block}body.modal-open{overflow:hidden}.resource-shell{height:100dvh;display:flex;flex-direction:column;max-width:760px;margin:0 auto;background:#f4f7f7}.resource-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;background:#fff;border-bottom:1px solid var(--line)}.resource-title{font-weight:900;font-size:.95rem;min-width:0}.resource-actions{display:flex;gap:7px;flex-shrink:0}.resource-btn{border:none;border-radius:11px;padding:10px 11px;font-weight:900;cursor:pointer}.resource-btn.full{background:#122127;color:white}.resource-btn.back{background:var(--accent);color:#fff}.resource-body{overflow:auto;-webkit-overflow-scrolling:touch;flex:1;padding:14px 14px calc(24px + env(safe-area-inset-bottom))}.resource-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px;box-shadow:var(--shadow)}.resource-img{width:100%;height:auto;display:block;border-radius:12px;border:1px solid #dfe7e8;background:#fff}.resource-hint{color:var(--muted);font-size:.8rem;line-height:1.4;margin:10px 0 0}.resource-list{display:grid;gap:12px;margin-top:2px}.stimulus-line{padding:15px 13px;border:1px solid #e0e8e9;border-radius:13px;background:#fbfcfc;font-size:1.15rem;font-weight:800;line-height:1.35}.stimulus-line.word{font-size:1.35rem;letter-spacing:.02em}.warning{margin-top:12px;padding:11px 12px;background:#fff8e8;color:#79520b;border:1px solid #f0d994;border-radius:12px;font-size:.78rem;line-height:1.4}.resource-language-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.resource-language-label{font-size:.8rem;font-weight:900;color:#42545c}.resource-lang-toggle{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#e9efef;border-radius:11px;padding:4px;min-width:164px}.resource-lang-toggle button{border:none;border-radius:8px;background:transparent;color:#4b5b62;padding:8px 10px;font-size:.78rem;font-weight:900;cursor:pointer}.resource-lang-toggle button.active{background:#fff;color:var(--accent2);box-shadow:0 1px 5px rgba(18,33,39,.12)}.resource-command{margin:0 0 12px;padding:12px 13px;border-radius:12px;background:#edf8f6;color:#163f3b;font-size:1rem;font-weight:850;line-height:1.35}.source-note{margin-top:10px;color:var(--muted);font-size:.72rem;line-height:1.4}
+    .presentation{display:none;position:fixed;inset:0;z-index:2000;background:#050708;color:white}.presentation.show{display:block}.presentation-stage{width:100vw;height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;touch-action:pan-x pan-y pinch-zoom}.presentation-stage img{display:block;max-width:100vw;max-height:100dvh;width:auto;height:auto;object-fit:contain}.presentation-text{width:min(94vw,900px);max-height:100dvh;overflow:auto;padding:calc(58px + env(safe-area-inset-top)) 18px calc(30px + env(safe-area-inset-bottom));display:grid;gap:14px}.presentation-text .stimulus-line{background:white;color:#111;border-color:#ddd;font-size:clamp(1.35rem,4.8vw,2.5rem);text-align:center}.presentation-text .stimulus-line.word{font-size:clamp(1.7rem,6vw,3rem)}.presentation-close{position:fixed;z-index:3;top:calc(10px + env(safe-area-inset-top));right:12px;border:none;border-radius:999px;background:rgba(255,255,255,.94);color:#111;padding:10px 13px;font-weight:900;box-shadow:0 2px 14px rgba(0,0,0,.22)}.orientation-tip{position:fixed;z-index:2;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);background:rgba(0,0,0,.72);color:white;border-radius:999px;padding:8px 11px;font-size:.76rem;font-weight:800;white-space:nowrap;pointer-events:none;transition:opacity .25s}.orientation-tip.fade{opacity:0}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}.grid .keep-two{grid-column:auto}.hero h1{font-size:1.75rem}.bp-grid{grid-template-columns:1fr 1fr}.resource-title{font-size:.86rem}.resource-btn{padding:9px 9px;font-size:.8rem}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <div class="topbar"><div class="brand">Stroke Code Logger</div><div id="storagePill" class="pill">Local storage</div></div>
+
+  <section id="home" class="screen active">
+    <div class="hero"><h1>Fast stroke-code logging.</h1><p>Capture key acute stroke data and NIHSS with minimal taps.</p></div>
+    <div id="draftHome"></div>
+    <div class="home-actions">
+      <button class="big-btn primary" type="button" onclick="startNewCode()"><span class="title">Start stroke code</span><span class="sub">Automatically timestamps the start</span></button>
+      <button class="big-btn secondary" type="button" onclick="showHistory()"><span class="title">Prior stroke codes</span><span class="sub">View saved entries on this device</span></button>
+    </div>
+    <div id="fileModeWarning" class="storage-warning">You opened this as a local file. The app will use browser local storage and verifies each save, but persistence for <strong>file://</strong> pages is not standardized across browsers. For the most dependable iPhone + Android use, serve this exact single HTML file from a stable HTTPS address.</div>
+    <div class="notice">Saved codes use persistent browser storage on this device and survive normal browser restarts. Do not use private/incognito browsing. Browser/site data can still be manually cleared, so this is not a substitute for the medical record. This app is not a HIPAA-compliant clinical record and should not be used for patient identifiers.</div>
+    <div class="attribution">Stroke Code Logger · designed by Zack G.</div>
+  </section>
+
+  <section id="logger" class="screen">
+    <button class="back-btn" type="button" onclick="goHome()">← Home</button>
+    <div class="section-card">
+      <div class="section-head"><div><h2 id="loggerTitle" class="section-title">Stroke code</h2><p id="loggerSubtitle" class="section-sub">Started <span id="startedDisplay"></span></p></div><div id="draftBadge" class="draft-badge">Draft · autosaved</div></div>
+      <div class="grid one" style="margin-bottom:12px">
+        <div><label for="nickname">Nickname <span style="font-weight:500;color:var(--muted)">(optional)</span></label><input id="nickname" maxlength="60" placeholder="e.g. ED 16 · posterior symptoms" autocomplete="off" /></div>
+      </div>
+      <div class="pmhx-block">
+        <div class="pmhx-label-row"><label style="margin:0">Important PMHx <span style="font-weight:500;color:var(--muted)">(optional)</span></label><span>Tap all that apply</span></div>
+        <div id="pmhxChips" class="chips">
+          <button type="button" class="chip" data-pmhx="HTN">HTN</button><button type="button" class="chip" data-pmhx="HLD">HLD</button><button type="button" class="chip" data-pmhx="DM">DM</button><button type="button" class="chip" data-pmhx="A-fib">A-fib</button><button type="button" class="chip" data-pmhx="Prior stroke/TIA">Prior stroke/TIA</button><button type="button" class="chip" data-pmhx="Prior ICH">Prior ICH</button><button type="button" class="chip" data-pmhx="CAD">CAD</button><button type="button" class="chip" data-pmhx="CHF">CHF</button>
+        </div>
+        <input id="pmhxOther" maxlength="120" placeholder="Other important history" autocomplete="off" />
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <div><label for="glucose">Blood sugar (mg/dL)</label><input id="glucose" inputmode="numeric" type="number" min="0" placeholder="e.g. 112" /></div>
+        <div><label>Initial blood pressure (mmHg)</label><div class="bp-grid"><input id="sbp" inputmode="numeric" type="number" min="0" placeholder="SBP" aria-label="Systolic blood pressure" /><input id="dbp" inputmode="numeric" type="number" min="0" placeholder="DBP" aria-label="Diastolic blood pressure" /></div></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-head"><label>Repeat blood pressures <span style="font-weight:500;color:var(--muted)">(optional)</span></label><button class="add-row-btn" type="button" onclick="addRepeatBP()">+ Add BP</button></div>
+        <div id="repeatBPList" class="entry-list"></div>
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <div><label for="lkw">Last known well</label><input id="lkw" type="datetime-local" /></div>
+        <div><label>AC / AP?</label><div class="segmented" id="acapSegment"><button type="button" data-value="No" class="active" onclick="setAcap('No')">No</button><button type="button" data-value="Yes" onclick="setAcap('Yes')">Yes</button></div></div>
+      </div>
+      <div id="acapFields" class="conditional">
+        <div class="subsection-head"><label>AC / AP medications</label><button class="add-row-btn" type="button" onclick="addMedicationRow()">+ Add medication</button></div>
+        <div id="acapMedList" class="entry-list"></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head"><div><h2 class="section-title">NIH Stroke Scale</h2><p class="section-sub">Select one score for each item.</p></div><div class="score-badge">NIHSS <span id="nihTotal">0</span></div></div>
+      <div id="nihContainer"></div>
+    </div>
+    <div class="sticky-save"><button id="saveCodeBtn" class="save-btn" type="button" onclick="saveCode()">Save stroke code</button></div>
+  </section>
+
+  <section id="history" class="screen">
+    <button class="back-btn" type="button" onclick="goHome()">← Home</button>
+    <div class="section-card"><div class="section-head"><div><h2 class="section-title">Prior stroke codes</h2><p class="section-sub">Saved locally in this browser on this device.</p></div></div><div id="historyList"></div></div>
+  </section>
+</main>
+
+<div id="resourceModal" class="resource-modal" role="dialog" aria-modal="true" aria-labelledby="resourceTitle">
+  <div class="resource-shell">
+    <div class="resource-topbar"><div id="resourceTitle" class="resource-title">NIHSS resource</div><div class="resource-actions"><button id="fullResourceBtn" class="resource-btn full" type="button" onclick="enterPresentation()">Full screen</button><button class="resource-btn back" type="button" onclick="closeNIHResource()">Back</button></div></div>
+    <div id="resourceBody" class="resource-body"></div>
+  </div>
+</div>
+<div id="presentation" class="presentation" role="dialog" aria-modal="true"><button class="presentation-close" type="button" onclick="exitPresentation()">✕ Back</button><div id="presentationStage" class="presentation-stage"></div><div id="orientationTip" class="orientation-tip"></div></div>
+<div id="deleteConfirm" class="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" onclick="if(event.target===this)closeDeleteConfirm()">
+  <div class="confirm-card"><h3 id="deleteConfirmTitle">Delete stroke code?</h3><p id="deleteConfirmText">This permanently removes the saved code from this device.</p><div class="confirm-actions"><button class="confirm-cancel" type="button" onclick="closeDeleteConfirm()">Cancel</button><button id="confirmDeleteBtn" class="confirm-delete" type="button" onclick="confirmDelete()">Delete</button></div></div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+const STORAGE_KEY='strokeCodeLogger.records.v4';
+const DRAFT_KEY='strokeCodeLogger.activeDraft.v1';
+const LEGACY_KEY='strokeCodes';
+const NINDS_PDF='https://www.ninds.nih.gov/sites/default/files/2025-03/KnowStroke_NIHStrokeScale_March2025_508c.pdf';
+const IMAGE_URLS={
+  scene:'https://static.wixstatic.com/media/69387f_b898656ccda94c4d9ed9d410a06a45a1~mv2.png/v1/fill/w_600%2Ch_454%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/best-language-image-1-tiny.png',
+  objects:'https://static.wixstatic.com/media/69387f_e4aeac7e23634e089b65f8788c1c0056~mv2.png/v1/fill/w_443%2Ch_600%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/best-language-image-2-tiny.png'
+};
+const NIH_ITEMS=[
+  {id:'1a',name:'1a. Level of consciousness',opts:[[0,'Alert'],[1,'Not alert; arousable by minor stimulation'],[2,'Not alert; requires repeated or painful stimulation'],[3,'Responds only with reflex motor/autonomic effects or unresponsive']]},
+  {id:'1b',name:'1b. LOC questions',opts:[[0,'Answers both correctly'],[1,'Answers one correctly'],[2,'Answers neither correctly']]},
+  {id:'1c',name:'1c. LOC commands',opts:[[0,'Performs both correctly'],[1,'Performs one correctly'],[2,'Performs neither correctly']]},
+  {id:'2',name:'2. Best gaze',opts:[[0,'Normal'],[1,'Partial gaze palsy'],[2,'Forced deviation or total gaze paresis']]},
+  {id:'3',name:'3. Visual',opts:[[0,'No visual loss'],[1,'Partial hemianopia'],[2,'Complete hemianopia'],[3,'Bilateral hemianopia / blindness']]},
+  {id:'4',name:'4. Facial palsy',opts:[[0,'Normal symmetric movements'],[1,'Minor paralysis'],[2,'Partial paralysis'],[3,'Complete paralysis of one or both sides']]},
+  {id:'5a',name:'5a. Motor arm — left',opts:[[0,'No drift'],[1,'Drift'],[2,'Some effort against gravity'],[3,'No effort against gravity'],[4,'No movement']]},
+  {id:'5b',name:'5b. Motor arm — right',opts:[[0,'No drift'],[1,'Drift'],[2,'Some effort against gravity'],[3,'No effort against gravity'],[4,'No movement']]},
+  {id:'6a',name:'6a. Motor leg — left',opts:[[0,'No drift'],[1,'Drift'],[2,'Some effort against gravity'],[3,'No effort against gravity'],[4,'No movement']]},
+  {id:'6b',name:'6b. Motor leg — right',opts:[[0,'No drift'],[1,'Drift'],[2,'Some effort against gravity'],[3,'No effort against gravity'],[4,'No movement']]},
+  {id:'7',name:'7. Limb ataxia',opts:[[0,'Absent'],[1,'Present in one limb'],[2,'Present in two limbs']]},
+  {id:'8',name:'8. Sensory',opts:[[0,'Normal'],[1,'Mild-to-moderate sensory loss'],[2,'Severe-to-total sensory loss']]},
+  {id:'9',name:'9. Best language',opts:[[0,'No aphasia'],[1,'Mild-to-moderate aphasia'],[2,'Severe aphasia'],[3,'Mute / global aphasia']]},
+  {id:'10',name:'10. Dysarthria',opts:[[0,'Normal'],[1,'Mild-to-moderate dysarthria'],[2,'Severe dysarthria / anarthria']]},
+  {id:'11',name:'11. Extinction and inattention',opts:[[0,'No abnormality'],[1,'Inattention or extinction in one modality'],[2,'Profound hemi-inattention or extinction in >1 modality']]}
+];
+const COMMANDS={
+  '1b':['month','age'],'1c':['openEyes','closeEyes','squeezeHand','letGo'],'2':['lookNose','followFinger'],'3':['lookNose','howManyFingers'],'4':['smile','showTeeth','raiseBrows','closeEyesTight'],
+  '5a':['raiseLeftArm','holdArm10'],'5b':['raiseRightArm','holdArm10'],'6a':['raiseLeftLeg','holdLeg5'],'6b':['raiseRightLeg','holdLeg5'],'7':['fingerNose','heelShin'],'8':['feelPin','sameSides'],
+  '9':['describePicture','nameObjects','readSentences'],'10':['readWords'],'11':['touchSide','movingFingers']
+};
+const EN={
+  month:'What month is it?',age:'How old are you?',openEyes:'Open your eyes.',closeEyes:'Close your eyes.',squeezeHand:'Squeeze my hand.',letGo:'Let go.',lookNose:'Look at my nose.',followFinger:'Follow my finger with your eyes. Do not move your head.',howManyFingers:'How many fingers do you see?',smile:'Smile.',showTeeth:'Show me your teeth.',raiseBrows:'Raise your eyebrows.',closeEyesTight:'Close your eyes tightly.',raiseLeftArm:'Lift your left arm.',raiseRightArm:'Lift your right arm.',holdArm10:'Keep it up for 10 seconds.',raiseLeftLeg:'Lift your left leg.',raiseRightLeg:'Lift your right leg.',holdLeg5:'Keep it up for 5 seconds.',fingerNose:'Touch my finger, then your nose. Repeat.',heelShin:'Put your heel on the other shin and slide it down.',feelPin:'Tell me if you feel this pinprick.',sameSides:'Does it feel the same on both sides?',describePicture:'Tell me what is happening in this picture.',nameObjects:'Name these objects.',readSentences:'Read these sentences out loud.',readWords:'Read these words out loud.',touchSide:'Tell me where I am touching: left, right, or both.',movingFingers:'Which fingers are moving: left, right, or both?'
+};
+const ES={
+  month:'¿Qué mes es?',age:'¿Cuántos años tiene?',openEyes:'Abra los ojos.',closeEyes:'Cierre los ojos.',squeezeHand:'Apriete mi mano.',letGo:'Suelte.',lookNose:'Mire mi nariz.',followFinger:'Siga mi dedo con los ojos. No mueva la cabeza.',howManyFingers:'¿Cuántos dedos ve?',smile:'Sonría.',showTeeth:'Muéstreme los dientes.',raiseBrows:'Levante las cejas.',closeEyesTight:'Cierre fuerte los ojos.',raiseLeftArm:'Levante el brazo izquierdo.',raiseRightArm:'Levante el brazo derecho.',holdArm10:'Manténgalo arriba 10 segundos.',raiseLeftLeg:'Levante la pierna izquierda.',raiseRightLeg:'Levante la pierna derecha.',holdLeg5:'Manténgala arriba 5 segundos.',fingerNose:'Toque mi dedo y luego su nariz. Repita.',heelShin:'Ponga el talón en la otra espinilla y deslícelo hacia abajo.',feelPin:'Dígame si siente este pinchazo.',sameSides:'¿Se siente igual en ambos lados?',describePicture:'Dígame qué pasa en esta imagen.',nameObjects:'Nombre estos objetos.',readSentences:'Lea estas frases en voz alta.',readWords:'Lea estas palabras en voz alta.',touchSide:'Dígame dónde lo toco: izquierda, derecha o ambos lados.',movingFingers:'¿Qué dedos se mueven: izquierda, derecha o ambos?'
+};
+const RESOURCE_TEXT={
+  en:{
+    sentences:['You know how.','Down to earth.','I got home from work.','Near the table in the dining room.','They heard him speak on the radio last night.'],
+    words:['MAMA','TIP-TOP','FIFTY-FIFTY','THANKS','HUCKLEBERRY','BASEBALL PLAYER','CATERPILLAR']
+  },
+  es:{
+    sentences:['Usted sabe cómo','Con los pies sobre la tierra','Llegué del trabajo a mi casa','Cerca de la mesa en el comedor','Anoche lo escucharon hablar en la radio'],
+    words:['Mamá','Ta te ti','Mitad y mitad','Gracias','Árbol','Futbolista']
+  }
+};
+const RESOURCE_COMMAND={
+  en:{scene:'Tell me what is happening in this picture.',objects:'Name these objects.',sentences:'Read these sentences out loud.',words:'Read these words out loud.'},
+  es:{scene:'Dígame qué pasa en esta imagen.',objects:'Nombre estos objetos.',sentences:'Lea estas frases en voz alta.',words:'Lea estas palabras en voz alta.'}
+};
+let currentStart=null,acap='No',currentResource=null,resourceLanguage='en',orientationTimer=null,currentRecordId=null,currentEditingId=null,pendingDeleteId=null,toastTimer=null,draftSaveTimer=null;
+const qs=id=>document.getElementById(id);
+const safe=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+function showToast(message,type='success',duration=1800){
+  const toast=qs('toast');clearTimeout(toastTimer);toast.textContent=message;toast.className=`toast ${type==='error'?'error':''}`.trim();requestAnimationFrame(()=>toast.classList.add('show'));toastTimer=setTimeout(()=>toast.classList.remove('show'),duration)
+}
+function setLoggerMode(editing){
+  qs('loggerTitle').textContent=editing?'Edit stroke code':'Stroke code';qs('saveCodeBtn').textContent=editing?'Save changes':'Save stroke code';qs('draftBadge').classList.toggle('hidden',editing)
+}
+function fmt(dt){return new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).format(dt)}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));qs(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+function goHome(){if(qs('logger').classList.contains('active')&&currentEditingId===null)saveDraftNow();renderDraftHome();showScreen('home')}
+function storageAvailable(){try{const k='__stroke_storage_test__';localStorage.setItem(k,'1');localStorage.removeItem(k);return true}catch(e){return false}}
+function newRecordId(){return (typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():`stroke-${Date.now()}-${Math.random().toString(36).slice(2,10)}`}
+function ensureRecordIds(records){
+  let changed=false;const seen=new Set();
+  records.forEach(r=>{
+    if(!r.id||r.id==='active-draft'||seen.has(String(r.id))){r.id=newRecordId();changed=true}
+    r.id=String(r.id);seen.add(r.id)
+  });
+  return changed
+}
+function loadRecords(){
+  if(!storageAvailable())return [];
+  try{
+    let records=[];const current=localStorage.getItem(STORAGE_KEY);
+    if(current)records=JSON.parse(current)||[];
+    else{const legacy=localStorage.getItem(LEGACY_KEY);if(legacy)records=JSON.parse(legacy)||[]}
+    if(!Array.isArray(records))records=[];
+    const migrated=ensureRecordIds(records);
+    if(migrated||(!current&&records.length))localStorage.setItem(STORAGE_KEY,JSON.stringify(records));
+    return records;
+  }catch(e){console.error(e);return []}
+}
+function writeRecords(records){
+  try{
+    const json=JSON.stringify(records);localStorage.setItem(STORAGE_KEY,json);
+    if(localStorage.getItem(STORAGE_KEY)!==json)throw new Error('Storage verification failed');
+    return true;
+  }catch(e){console.error(e);return false}
+}
+function loadDraft(){
+  if(!storageAvailable())return null;
+  try{
+    const raw=localStorage.getItem(DRAFT_KEY);if(!raw)return null;
+    const draft=JSON.parse(raw);if(!draft)return null;
+    if(!draft.id||draft.id==='active-draft'){
+      const matchingSaved=loadRecords().find(r=>r.startedAt&&draft.startedAt&&r.startedAt===draft.startedAt);
+      draft.id=matchingSaved?.id||newRecordId();writeDraft(draft)
+    }
+    draft.id=String(draft.id);return draft
+  }catch(e){console.error(e);return null}
+}
+function writeDraft(draft){
+  try{const json=JSON.stringify(draft);localStorage.setItem(DRAFT_KEY,json);if(localStorage.getItem(DRAFT_KEY)!==json)throw new Error('Draft verification failed');return true}catch(e){console.error(e);return false}
+}
+function clearDraft(){try{localStorage.removeItem(DRAFT_KEY);return true}catch(e){console.error(e);return false}}
+function scheduleDraftSave(){if(currentEditingId!==null||!currentStart||!qs('logger').classList.contains('active'))return;clearTimeout(draftSaveTimer);draftSaveTimer=setTimeout(saveDraftNow,180)}
+function saveDraftNow(){
+  if(currentEditingId!==null||!currentStart)return false;
+  if(!currentRecordId)currentRecordId=newRecordId();
+  const draft=collectFormRecord(currentRecordId,true);draft.savedAsDraftAt=new Date().toISOString();const ok=writeDraft(draft);qs('draftBadge').textContent=ok?'Draft · autosaved':'Draft · storage error';if(ok)renderDraftHome();return ok
+}
+async function requestPersistentStorage(){
+  try{
+    if(navigator.storage&&navigator.storage.persist)return await navigator.storage.persist();
+  }catch(e){}
+  return false
+}
+async function updateStorageUI(){
+  const ok=storageAvailable();let label=ok?'Local storage':'Storage unavailable';
+  if(ok){
+    try{if(navigator.storage&&navigator.storage.persisted&&await navigator.storage.persisted())label='Local · persistent'}catch(e){}
+  }
+  qs('storagePill').textContent=label;qs('storagePill').classList.toggle('warn',!ok);
+  qs('fileModeWarning').classList.toggle('show',location.protocol==='file:');
+}
+function setAcap(value){
+  acap=value;document.querySelectorAll('#acapSegment button').forEach(b=>b.classList.toggle('active',b.dataset.value===value));qs('acapFields').classList.toggle('show',value==='Yes');
+  if(value==='Yes'&&!qs('acapMedList').children.length)addMedicationRow('','',false);scheduleDraftSave()
+}
+function addMedicationRow(drug='',lastDose='',save=true){
+  if(save){const rows=[...document.querySelectorAll('#acapMedList .med-row')];const last=rows.at(-1);if(last&&!last.querySelector('.med-drug').value.trim()&&!last.querySelector('.med-dose').value.trim()){showToast('Enter something for the current medication first','error',2400);last.querySelector('.med-drug').focus();return}}
+  const row=document.createElement('div');row.className='entry-row med-row';row.innerHTML=`<div class="entry-row-grid"><div><label>Drug</label><input class="med-drug" placeholder="e.g. apixaban, aspirin" value="${safe(drug)}"></div><div><label>Last dose</label><input class="med-dose" placeholder="e.g. this morning, 21:00" value="${safe(lastDose)}"></div></div><div class="entry-actions"><button class="remove-row-btn" type="button" onclick="removeEntryRow(this)">Remove</button></div>`;qs('acapMedList').appendChild(row);if(save)scheduleDraftSave()
+}
+function renderMedicationRows(meds=[]){qs('acapMedList').innerHTML='';const rows=meds.length?meds:[{drug:'',lastDose:''}];rows.forEach(m=>addMedicationRow(m.drug||'',m.lastDose||'',false))}
+function getMedicationRows(){return [...document.querySelectorAll('#acapMedList .med-row')].map(r=>({drug:r.querySelector('.med-drug').value.trim(),lastDose:r.querySelector('.med-dose').value.trim()})).filter(m=>m.drug||m.lastDose)}
+function addRepeatBP(sbp='',dbp='',context='',save=true){
+  if(save){const rows=[...document.querySelectorAll('#repeatBPList .repeat-bp-row')];const last=rows.at(-1);if(last&&!last.querySelector('.repeat-sbp').value.trim()&&!last.querySelector('.repeat-dbp').value.trim()&&!last.querySelector('.repeat-context').value.trim()){showToast('Enter something for the current BP first','error',2400);last.querySelector('.repeat-sbp').focus();return}}
+  const row=document.createElement('div');row.className='entry-row repeat-bp-row';row.innerHTML=`<div class="entry-row-grid"><div><label>SBP</label><input class="repeat-sbp" inputmode="numeric" type="number" min="0" placeholder="SBP" value="${safe(sbp)}"></div><div><label>DBP</label><input class="repeat-dbp" inputmode="numeric" type="number" min="0" placeholder="DBP" value="${safe(dbp)}"></div></div><div class="entry-context"><label>When / context</label><input class="repeat-context" placeholder="e.g. on my arrival, after labetalol, 14:32" value="${safe(context)}"></div><div class="entry-actions"><button class="remove-row-btn" type="button" onclick="removeEntryRow(this)">Remove</button></div>`;qs('repeatBPList').appendChild(row);if(save)scheduleDraftSave()
+}
+function renderRepeatBPs(rows=[]){qs('repeatBPList').innerHTML='';rows.forEach(b=>addRepeatBP(b.sbp||'',b.dbp||'',b.context||'',false))}
+function getRepeatBPs(){return [...document.querySelectorAll('#repeatBPList .repeat-bp-row')].map(r=>({sbp:r.querySelector('.repeat-sbp').value.trim(),dbp:r.querySelector('.repeat-dbp').value.trim(),context:r.querySelector('.repeat-context').value.trim()})).filter(b=>b.sbp||b.dbp||b.context)}
+function removeEntryRow(btn){btn.closest('.entry-row')?.remove();scheduleDraftSave()}
+function normalizeMeds(r){if(Array.isArray(r.acapMeds)&&r.acapMeds.length)return r.acapMeds;return (r.acapDrug||r.lastDose)?[{drug:r.acapDrug||'',lastDose:r.lastDose||''}]:[]}
+function selectedPMHx(){return [...document.querySelectorAll('.chip.active')].map(b=>b.dataset.pmhx)}
+function resetPMHx(){document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));qs('pmhxOther').value=''}
+function renderNIH(){
+  qs('nihContainer').innerHTML=NIH_ITEMS.map(item=>{
+    const resources=item.id==='9'?[['scene','Scene'],['objects','Objects'],['sentences','Sentences']]:item.id==='10'?[['words','Word list']]:[];
+    const tools=[...resources.map(([k,l])=>`<button type="button" class="tool-btn" onclick="openNIHResource('${k}')">${l}</button>`),...(COMMANDS[item.id]?[`<button type="button" class="tool-btn secondary" onclick="toggleSpanish('${item.id}')">Spanish commands</button>`]:[])].join('');
+    return `<div class="nih-item"><div class="nih-label"><strong>${item.name}</strong><span id="score-${item.id}">0 points</span></div><select id="nih-${item.id}" onchange="updateNIH()">${item.opts.map(([v,t])=>`<option value="${v}">${v} — ${t}</option>`).join('')}</select>${tools?`<div class="nih-tools">${tools}</div>`:''}${COMMANDS[item.id]?`<div id="spanish-${item.id}" class="spanish-panel"></div>`:''}</div>`;
+  }).join('')
+}
+function updateNIH(){let total=0;NIH_ITEMS.forEach(item=>{const v=Number(qs(`nih-${item.id}`).value||0);total+=v;qs(`score-${item.id}`).textContent=`${v} point${v===1?'':'s'}`});qs('nihTotal').textContent=total;scheduleDraftSave()}
+function toggleSpanish(itemId){
+  const panel=qs(`spanish-${itemId}`),opening=!panel.classList.contains('show');document.querySelectorAll('.spanish-panel.show').forEach(p=>{if(p!==panel)p.classList.remove('show')});
+  if(opening){const keys=COMMANDS[itemId]||[];panel.innerHTML=`<div class="spanish-head">Simple Spanish bedside commands</div><div class="command-list">${keys.map(k=>`<div class="command"><div class="command-en">${safe(EN[k])}</div><div class="command-es">${safe(ES[k])}</div></div>`).join('')}</div><div class="lang-note">Quick communication aid only; not a validated Spanish NIHSS. Use an interpreter/validated language-specific stimuli when available, especially for language and dysarthria testing.</div>`}
+  panel.classList.toggle('show',opening)
+}
+function resetLoggerForm(){
+  qs('nickname').value='';resetPMHx();qs('glucose').value='';qs('sbp').value='';qs('dbp').value='';qs('lkw').value='';renderRepeatBPs([]);renderMedicationRows([]);setAcap('No');renderNIH();updateNIH()
+}
+function collectFormRecord(id,isDraft=false){
+  const nih={};let total=0;NIH_ITEMS.forEach(item=>{const s=Number(qs(`nih-${item.id}`).value||0);total+=s;nih[item.id]={score:s,label:item.name}});
+  const sbp=qs('sbp').value.trim(),dbp=qs('dbp').value.trim(),meds=acap==='Yes'?getMedicationRows():[];
+  return {id,startedAt:currentStart?currentStart.toISOString():new Date().toISOString(),nickname:qs('nickname').value.trim(),pmhx:selectedPMHx(),pmhxOther:qs('pmhxOther').value.trim(),glucose:qs('glucose').value.trim(),sbp,dbp,bp:(sbp||dbp)?`${sbp||'—'}/${dbp||'—'}`:'',repeatBPs:getRepeatBPs(),lkw:qs('lkw').value,acap,acapMeds:meds,acapDrug:meds[0]?.drug||'',lastDose:meds[0]?.lastDose||'',nih,nihTotal:total,isDraft};
+}
+function populateLogger(r,editing=false){
+  currentRecordId=String(r.id||newRecordId());currentEditingId=editing?currentRecordId:null;currentStart=new Date(r.startedAt||Date.now());setLoggerMode(editing);qs('startedDisplay').textContent=fmt(currentStart);qs('nickname').value=r.nickname||'';
+  const legacyBP=(!r.sbp&&!r.dbp&&typeof r.bp==='string')?r.bp.split('/'):[];document.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active',Array.isArray(r.pmhx)&&r.pmhx.includes(b.dataset.pmhx)));qs('pmhxOther').value=r.pmhxOther||'';qs('glucose').value=r.glucose||'';qs('sbp').value=r.sbp||legacyBP[0]||'';qs('dbp').value=r.dbp||legacyBP[1]||'';qs('lkw').value=r.lkw||'';renderRepeatBPs(Array.isArray(r.repeatBPs)?r.repeatBPs:[]);renderMedicationRows(normalizeMeds(r));setAcap(r.acap==='Yes'?'Yes':'No');
+  renderNIH();NIH_ITEMS.forEach(item=>{const el=qs(`nih-${item.id}`);if(el)el.value=String(r.nih?.[item.id]?.score??0)});updateNIH();showScreen('logger')
+}
+function startNewCode(){
+  const draft=loadDraft();if(draft){populateLogger(draft,false);showToast('Resumed draft');return}
+  currentEditingId=null;currentRecordId=newRecordId();currentStart=new Date();setLoggerMode(false);qs('startedDisplay').textContent=fmt(currentStart);resetLoggerForm();showScreen('logger');saveDraftNow();requestPersistentStorage();updateStorageUI()
+}
+function resumeDraft(){const draft=loadDraft();if(!draft){showToast('No draft found','error',2400);renderDraftHome();return}populateLogger(draft,false)}
+function editRecord(id){const r=loadRecords().find(x=>x.id===id);if(!r){showToast('Saved code not found','error',2600);return}populateLogger(r,true)}
+async function saveCode(){
+  const editing=currentEditingId!==null;if(!currentRecordId)currentRecordId=editing?currentEditingId:newRecordId();const id=String(currentRecordId);const record=collectFormRecord(id,false);if(editing)record.editedAt=new Date().toISOString();
+  const records=loadRecords();const idx=records.findIndex(r=>String(r.id)===id);if(idx>=0)records[idx]=record;else records.unshift(record);
+  if(!writeRecords(records)){showToast('Could not save stroke code','error',4000);return}
+  if(!editing)clearDraft();currentEditingId=null;currentRecordId=null;setLoggerMode(false);await requestPersistentStorage();await updateStorageUI();renderDraftHome();showHistory();showToast(editing?'Stroke code updated':'Stroke code saved')
+}
+function bpDisplay(r){if(r.sbp||r.dbp)return `${r.sbp||'—'}/${r.dbp||'—'}`;return r.bp||'—'}
+function draftCardHTML(draft,compact=false){
+  const title=draft.nickname?safe(draft.nickname):'Stroke code in progress',bp=bpDisplay(draft),meta=`Started ${fmt(new Date(draft.startedAt))} · NIHSS ${draft.nihTotal??0}`;
+  return `<div class="draft-card"><div class="draft-card-top"><div><div class="draft-card-title">${title}</div><div class="draft-card-meta">${meta}${compact?'':` · BP ${safe(bp)}`}</div></div><span class="draft-badge">Draft</span></div><div class="draft-actions"><button class="small-btn edit" type="button" onclick="resumeDraft()">Resume draft</button><button class="small-btn danger" type="button" onclick="discardDraft()">Discard draft</button></div></div>`
+}
+function renderDraftHome(){const d=loadDraft();qs('draftHome').innerHTML=d?draftCardHTML(d,true):''}
+function showHistory(){
+  const records=loadRecords(),draft=loadDraft(),list=qs('historyList');if(!records.length&&!draft){list.innerHTML='<div class="empty">No stroke codes saved yet.</div>';showScreen('history');return}
+  let html=draft?draftCardHTML(draft,false):'';
+  html+=records.map(r=>{
+    const lkw=r.lkw?fmt(new Date(r.lkw)):'Not entered',bp=bpDisplay(r),history=[...(Array.isArray(r.pmhx)?r.pmhx:[]),r.pmhxOther].filter(Boolean).join(', ')||'—',meds=normalizeMeds(r),repeats=Array.isArray(r.repeatBPs)?r.repeatBPs:[];
+    const medLines=meds.length?meds.map((m,i)=>`\n${meds.length>1?`Medication ${i+1}: `:'Drug: '}${m.drug||'—'}\nLast dose: ${m.lastDose||'—'}`).join(''):'';
+    const repeatLines=repeats.length?`\nRepeat blood pressures:${repeats.map((b,i)=>`\n  ${i+1}. ${b.sbp||'—'}/${b.dbp||'—'}${b.context?` — ${b.context}`:''}`).join('')}`:'';
+    const nihLines=NIH_ITEMS.map(item=>`${item.name}: ${r.nih?.[item.id]?.score??0}`).join('\n');
+    const details=`${r.nickname?`Nickname: ${r.nickname}\n`:''}Started: ${fmt(new Date(r.startedAt))}\nImportant PMHx: ${history}\nBlood sugar: ${r.glucose||'—'}\nInitial blood pressure: ${bp}${repeatLines}\nLast known well: ${lkw}\nAC/AP: ${r.acap||'No'}${r.acap==='Yes'?medLines:''}\nNIHSS total: ${r.nihTotal}\n\n${nihLines}`;
+    const title=r.nickname?safe(r.nickname):`NIHSS ${r.nihTotal}`;
+    return `<div class="record"><div class="record-top"><div><div class="record-title">${title}${r.nickname?` <span style="color:var(--muted);font-weight:700">· NIHSS ${r.nihTotal}</span>`:''}</div><div class="record-meta">${fmt(new Date(r.startedAt))} · BP ${safe(bp)} · glucose ${safe(r.glucose||'—')}</div></div></div><div class="record-actions"><button class="small-btn" type="button" onclick="toggleDetails('${r.id}')">View</button><button class="small-btn edit" type="button" onclick="editRecord('${r.id}')">Edit</button><button class="small-btn danger" type="button" onclick="deleteRecord('${r.id}')">Delete</button></div><div id="details-${r.id}" class="details">${safe(details)}</div></div>`
+  }).join('');list.innerHTML=html;showScreen('history')
+}
+function toggleDetails(id){qs(`details-${id}`).classList.toggle('show')}
+function deleteRecord(id){
+  const r=loadRecords().find(x=>x.id===id);pendingDeleteId=id;const label=r?.nickname?`“${r.nickname}”`:(r?.startedAt?fmt(new Date(r.startedAt)):'this stroke code');qs('deleteConfirmTitle').textContent='Delete stroke code?';qs('deleteConfirmText').textContent=`Delete ${label}? This permanently removes the saved code from this device.`;qs('confirmDeleteBtn').textContent='Delete';qs('deleteConfirm').classList.add('show')
+}
+function discardDraft(){pendingDeleteId='__draft__';qs('deleteConfirmTitle').textContent='Discard draft?';qs('deleteConfirmText').textContent='This permanently removes the current in-progress stroke code draft from this device.';qs('confirmDeleteBtn').textContent='Discard';qs('deleteConfirm').classList.add('show')}
+function closeDeleteConfirm(){pendingDeleteId=null;qs('deleteConfirm').classList.remove('show')}
+function confirmDelete(){
+  if(!pendingDeleteId){closeDeleteConfirm();return}
+  if(pendingDeleteId==='__draft__'){const ok=clearDraft();closeDeleteConfirm();renderDraftHome();if(qs('history').classList.contains('active'))showHistory();showToast(ok?'Draft discarded':'Could not discard draft',ok?'success':'error',ok?1800:3500);return}
+  const id=pendingDeleteId,records=loadRecords().filter(r=>r.id!==id);if(!writeRecords(records)){closeDeleteConfirm();showToast('Could not delete stroke code','error',3500);return}closeDeleteConfirm();showHistory();showToast('Stroke code deleted')
+}
+function resourceTitle(type){return {scene:'Best language — scene',objects:'Best language — object naming',sentences:'Best language — sentences',words:'Dysarthria — word list'}[type]||'NIHSS resource'}
+function resourceOrientation(type){return type==='scene'?'landscape':'portrait'}
+function resourceLanguageToggle(){
+  return `<div class="resource-language-bar"><div class="resource-language-label">Testing language</div><div class="resource-lang-toggle" role="group" aria-label="Testing language"><button type="button" class="${resourceLanguage==='en'?'active':''}" onclick="setResourceLanguage('en')">English</button><button type="button" class="${resourceLanguage==='es'?'active':''}" onclick="setResourceLanguage('es')">Español</button></div></div>`
+}
+function resourceSourceNote(){
+  return resourceLanguage==='es'
+    ? `<div class="source-note">Spanish sentence and dysarthria stimuli follow the validated Spanish NIHSS adaptation (Domínguez et al., Mayo Clinic Proceedings, 2006). The current visual cards are retained for scene/object testing and are not presented here as validated Spanish-adapted drawings.</div>`
+    : '';
+}
+function renderResourceBody(){
+  if(!currentResource)return;
+  let content=resourceLanguageToggle();
+  const command=RESOURCE_COMMAND[resourceLanguage][currentResource];
+  if(currentResource==='scene'||currentResource==='objects'){
+    const alt=currentResource==='scene'?'NIHSS scene description stimulus':'NIHSS object naming stimulus';
+    content+=`<div class="resource-card"><div class="resource-command">${safe(command)}</div><img class="resource-img" src="${IMAGE_URLS[currentResource]}" alt="${alt}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/><div style="display:none" class="warning">The image could not be loaded. Internet access is required for this image in this standalone file.</div><p class="resource-hint">Tap <strong>Full screen</strong>. ${currentResource==='scene'?'This card is best viewed with the phone sideways.':'This card is best viewed upright.'}</p>${resourceSourceNote()}</div>`;
+  }else{
+    const key=currentResource==='words'?'words':'sentences',isWord=currentResource==='words';
+    const items=RESOURCE_TEXT[resourceLanguage][key];
+    content+=`<div class="resource-card"><div class="resource-command">${safe(command)}</div><div class="resource-list">${items.map(x=>`<div class="stimulus-line ${isWord?'word':''}">${safe(x)}</div>`).join('')}</div>${resourceSourceNote()}</div>`;
+  }
+  qs('resourceBody').innerHTML=content;qs('resourceBody').scrollTop=0
+}
+function setResourceLanguage(lang){
+  if(lang!=='en'&&lang!=='es')return;
+  resourceLanguage=lang;
+  renderResourceBody();
+  if(qs('presentation').classList.contains('show'))renderPresentationStage()
+}
+function openNIHResource(type){
+  currentResource=type;resourceLanguage='en';qs('resourceTitle').textContent=resourceTitle(type);renderResourceBody();qs('resourceModal').classList.add('show');document.body.classList.add('modal-open')
+}
+function closeNIHResource(){exitPresentation(true);qs('resourceModal').classList.remove('show');document.body.classList.remove('modal-open')}
+function renderPresentationStage(){
+  if(!currentResource)return;
+  const stage=qs('presentationStage');stage.innerHTML='';
+  if(currentResource==='scene'||currentResource==='objects'){
+    const img=document.createElement('img');img.src=IMAGE_URLS[currentResource];img.alt=resourceTitle(currentResource);stage.appendChild(img)
+  }else{
+    const key=currentResource==='words'?'words':'sentences',isWord=currentResource==='words';const wrap=document.createElement('div');wrap.className='presentation-text';wrap.innerHTML=RESOURCE_TEXT[resourceLanguage][key].map(x=>`<div class="stimulus-line ${isWord?'word':''}">${safe(x)}</div>`).join('');stage.appendChild(wrap)
+  }
+}
+async function enterPresentation(){
+  if(!currentResource)return;const pref=resourceOrientation(currentResource);renderPresentationStage();
+  qs('orientationTip').textContent=pref==='landscape'?'Best viewed landscape — rotate phone sideways':'Best viewed portrait — keep phone upright';qs('orientationTip').classList.remove('fade');qs('presentation').classList.add('show');
+  clearTimeout(orientationTimer);orientationTimer=setTimeout(()=>qs('orientationTip').classList.add('fade'),2600);
+  try{if(qs('presentation').requestFullscreen)await qs('presentation').requestFullscreen()}catch(e){}
+  try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock(pref)}catch(e){}
+}
+function exitPresentation(skipFullscreenExit=false){
+  qs('presentation').classList.remove('show');qs('presentationStage').innerHTML='';clearTimeout(orientationTimer);try{if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock()}catch(e){}
+  if(!skipFullscreenExit){try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen()}catch(e){}}
+}
+document.querySelectorAll('.chip').forEach(btn=>btn.addEventListener('click',()=>{btn.classList.toggle('active');scheduleDraftSave()}));
+document.addEventListener('input',e=>{if(e.target.closest('#logger'))scheduleDraftSave()});
+document.addEventListener('change',e=>{if(e.target.closest('#logger'))scheduleDraftSave()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveDraftNow()});
+window.addEventListener('pagehide',()=>saveDraftNow());
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(qs('presentation').classList.contains('show'))exitPresentation();else if(qs('resourceModal').classList.contains('show'))closeNIHResource();else if(qs('deleteConfirm').classList.contains('show'))closeDeleteConfirm()}});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&qs('presentation').classList.contains('show')){/* keep CSS full-viewport fallback active */}});
+renderNIH();updateNIH();renderDraftHome();updateStorageUI();
+</script>
+</body>
+</html>
