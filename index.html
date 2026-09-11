@@ -14,13 +14,15 @@
   <title>Stroke Code Logger</title>
   <style>
     :root{
-      --bg:#f4f7f7;--card:#fff;--ink:#122127;--muted:#63717a;--line:#d8e1e3;
+      --bg:#f4f7f7;--bg-top:#eef7f6;--card:#fff;--field:#fbfcfc;--ink:#122127;--muted:#63717a;--line:#d8e1e3;
       --accent:#0f766e;--accent2:#115e59;--danger:#b42318;--warn:#8a5b00;
-      --shadow:0 10px 28px rgba(18,33,39,.08);--radius:18px;
+      --soft:#dff3f0;--soft2:#f2fbfa;--subtle:#f8fbfb;--shadow:0 10px 28px rgba(18,33,39,.08);--radius:18px;
     }
+    html[data-theme="dark"]{--bg:#0d1518;--bg-top:#102124;--card:#152126;--field:#101a1e;--ink:#edf5f5;--muted:#9daeb4;--line:#304047;--accent:#2aa89c;--accent2:#79d2c9;--danger:#ff8a80;--warn:#e5b85b;--soft:#173b39;--soft2:#142d2c;--subtle:#101c20;--shadow:0 10px 28px rgba(0,0,0,.25)}
+    html[data-text-size="large"]{font-size:17px}
     *{box-sizing:border-box}
     html{-webkit-text-size-adjust:100%}
-    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#eef7f6 0,var(--bg) 260px);color:var(--ink);min-height:100vh}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,var(--bg-top) 0,var(--bg) 260px);color:var(--ink);min-height:100vh}
     button,input,select,textarea{font:inherit}
     button{-webkit-tap-highlight-color:transparent}
     .app{max-width:760px;margin:0 auto;padding:18px 16px calc(34px + env(safe-area-inset-bottom))}
@@ -30,15 +32,15 @@
     .pill.warn{background:#fff2d5;color:#7a5100}
     .screen{display:none}.screen.active{display:block}
     .hero{padding:24px 2px 8px}.hero h1{margin:0 0 8px;font-size:2rem;letter-spacing:-.04em}.hero p{margin:0;color:var(--muted);line-height:1.5}
-    .home-actions{display:grid;gap:14px;margin-top:26px}
+    .home-actions{display:grid;gap:14px;margin-top:26px}.home-group{display:grid;gap:7px}.home-kicker{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900;padding-left:3px}.home-settings{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
     .big-btn{border:none;border-radius:20px;padding:22px;text-align:left;cursor:pointer;box-shadow:var(--shadow)}
-    .big-btn.primary{background:var(--accent);color:white}.big-btn.secondary{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+    .big-btn.primary{background:var(--accent);color:white}.big-btn.secondary{background:var(--card);color:var(--ink);border:1px solid var(--line)}.big-btn.tertiary{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none;padding:16px 18px}
     .big-btn .title{font-size:1.15rem;font-weight:800;display:block;margin-bottom:5px}.big-btn .sub{opacity:.78;font-size:.92rem}
     .section-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px 0}
     .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.section-title{margin:0;font-size:1.05rem;font-weight:800}.section-sub{margin:4px 0 0;color:var(--muted);font-size:.86rem}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid.one{grid-template-columns:1fr}.span-2{grid-column:1/-1}
     label{display:block;font-size:.84rem;font-weight:700;margin-bottom:6px;color:#304047}
-    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:#fbfcfc;color:var(--ink);outline:none}
+    input,select,textarea{width:100%;min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:var(--field);color:var(--ink);outline:none}
     input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(15,118,110,.12)}
     .bp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .segmented{display:grid;grid-template-columns:1fr 1fr;gap:8px}.segmented button{border:1px solid var(--line);background:#fbfcfc;padding:11px;border-radius:12px;font-weight:800;cursor:pointer;color:#44535a}.segmented button.active{background:#dff3f0;color:var(--accent2);border-color:#87c9c1}
@@ -46,8 +48,9 @@
     .status-badge{display:inline-flex;align-items:center;border-radius:999px;padding:6px 9px;background:#e7f3f1;color:var(--accent2);font-size:.72rem;font-weight:900;white-space:nowrap}.status-badge.complete{background:#eef2f3;color:#5c6970}
     .subsection{margin-top:14px;padding-top:13px;border-top:1px solid #edf1f2}.subsection-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}.subsection-head label{margin:0}.add-row-btn{border:1px solid #b8d7d3;background:#f2fbfa;color:var(--accent2);border-radius:10px;padding:8px 10px;font-size:.78rem;font-weight:900;cursor:pointer}.entry-list{display:grid;gap:9px}.entry-row{border:1px solid #e2e9ea;border-radius:13px;background:#fbfcfc;padding:10px}.entry-row-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.entry-context{margin-top:8px}.entry-actions{display:flex;justify-content:flex-end;margin-top:7px}.remove-row-btn{border:none;background:transparent;color:var(--danger);font-size:.76rem;font-weight:900;padding:4px;cursor:pointer}
     .pmhx-block{margin-top:12px;padding-top:12px;border-top:1px solid #edf1f2}.pmhx-label-row{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:8px}.pmhx-label-row span{font-size:.75rem;color:var(--muted)}
-    .identity-grid{display:grid;grid-template-columns:minmax(0,1fr) 86px;gap:10px;margin-bottom:12px}.textarea-field{position:relative}.textarea-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}.textarea-head label{margin:0}.auto-grow{overflow:hidden;resize:none;min-height:46px;line-height:1.4}.hpi-text{min-height:88px}.dictate-btn{border:1px solid #b8d7d3;background:#f2fbfa;color:var(--accent2);border-radius:10px;padding:7px 9px;font-size:.76rem;font-weight:900;cursor:pointer;white-space:nowrap}.dictate-btn.listening{background:#dff3f0;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
-    .lkw-wrap{display:grid;grid-template-columns:minmax(150px,1.35fr) minmax(130px,1fr) 88px;gap:8px;align-items:end}.lkw-time{display:grid;grid-template-columns:1fr auto 1fr;gap:5px;align-items:center}.lkw-colon{text-align:center;font-weight:900;color:var(--muted)}.mini-label{font-size:.72rem;color:var(--muted);font-weight:800;margin-bottom:4px}.history-status{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;background:#e7f3f1;color:var(--accent2);font-size:.68rem;font-weight:900;vertical-align:1px}
+    .identity-grid{display:grid;grid-template-columns:minmax(0,1fr) 86px;gap:10px;margin-bottom:12px}.textarea-field{position:relative}.textarea-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}.textarea-head label{margin:0}.auto-grow{overflow:hidden;resize:none;min-height:46px;line-height:1.4}.hpi-text{min-height:88px}.dictate-btn{border:1px solid #b8d7d3;background:var(--soft2);color:var(--accent2);border-radius:10px;padding:7px 9px;font-size:.76rem;font-weight:900;cursor:pointer;white-space:nowrap}.dictate-btn.listening{background:var(--soft);box-shadow:0 0 0 3px rgba(15,118,110,.12)}
+    .vitals-row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.55fr);gap:10px;align-items:end;margin-top:14px}.vitals-row label{font-size:.78rem}.vitals-row input{padding:11px 10px}.lkw-wrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) 66px;gap:7px;align-items:end}.lkw-wrap input,.lkw-wrap select{padding:10px 7px;font-size:.84rem}.lkw-time{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:3px;align-items:center}.lkw-colon{text-align:center;font-weight:900;color:var(--muted)}.mini-label{font-size:.68rem;color:var(--muted);font-weight:800;margin-bottom:4px}.history-status{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;background:var(--soft);color:var(--accent2);font-size:.68rem;font-weight:900;vertical-align:1px}
+    .settings-grid{display:grid;gap:18px}.setting-row{display:grid;gap:8px}.setting-label{font-weight:900;font-size:.9rem}.setting-help{color:var(--muted);font-size:.78rem;line-height:1.4}.segmented.three{grid-template-columns:repeat(3,1fr)}
     .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}.chip{border:1px solid var(--line);background:#fbfcfc;color:#42545c;border-radius:999px;padding:8px 11px;font-size:.8rem;font-weight:800;cursor:pointer}.chip.active{background:#dff3f0;color:var(--accent2);border-color:#87c9c1}
     .nih-item{padding:13px 0;border-top:1px solid #edf1f2}.nih-item:first-of-type{border-top:none;padding-top:0}.nih-label{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:7px}.nih-label strong{font-size:.92rem}.nih-label span{color:var(--muted);font-size:.8rem}
     .score-badge{background:#e8f2f2;color:var(--accent2);border-radius:999px;padding:8px 11px;font-weight:900;min-width:60px;text-align:center;white-space:nowrap}
@@ -61,7 +64,8 @@
     .confirm-overlay{display:none;position:fixed;inset:0;z-index:3500;background:rgba(18,33,39,.42);padding:18px;align-items:center;justify-content:center}.confirm-overlay.show{display:flex}.confirm-card{width:min(92vw,390px);background:white;border-radius:20px;padding:20px;box-shadow:0 24px 70px rgba(18,33,39,.28)}.confirm-card h3{margin:0 0 7px;font-size:1.12rem}.confirm-card p{margin:0;color:var(--muted);font-size:.88rem;line-height:1.45}.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.confirm-actions button{border:none;border-radius:12px;padding:12px;font-weight:900;cursor:pointer}.confirm-cancel{background:#eef2f2;color:#34464d}.confirm-delete{background:var(--danger);color:white}
     .resource-modal{display:none;position:fixed;inset:0;z-index:1000;background:#f4f7f7}.resource-modal.show{display:block}body.modal-open{overflow:hidden}.resource-shell{height:100dvh;display:flex;flex-direction:column;max-width:760px;margin:0 auto;background:#f4f7f7}.resource-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;background:#fff;border-bottom:1px solid var(--line)}.resource-title{font-weight:900;font-size:.95rem;min-width:0}.resource-actions{display:flex;gap:7px;flex-shrink:0}.resource-btn{border:none;border-radius:11px;padding:10px 11px;font-weight:900;cursor:pointer}.resource-btn.full{background:#122127;color:white}.resource-btn.back{background:var(--accent);color:#fff}.resource-body{overflow:auto;-webkit-overflow-scrolling:touch;flex:1;padding:14px 14px calc(24px + env(safe-area-inset-bottom))}.resource-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px;box-shadow:var(--shadow)}.resource-img{width:100%;height:auto;display:block;border-radius:12px;border:1px solid #dfe7e8;background:#fff}.resource-hint{color:var(--muted);font-size:.8rem;line-height:1.4;margin:10px 0 0}.resource-list{display:grid;gap:12px;margin-top:2px}.stimulus-line{padding:15px 13px;border:1px solid #e0e8e9;border-radius:13px;background:#fbfcfc;font-size:1.15rem;font-weight:800;line-height:1.35}.stimulus-line.word{font-size:1.35rem;letter-spacing:.02em}.warning{margin-top:12px;padding:11px 12px;background:#fff8e8;color:#79520b;border:1px solid #f0d994;border-radius:12px;font-size:.78rem;line-height:1.4}.resource-language-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.resource-language-label{font-size:.8rem;font-weight:900;color:#42545c}.resource-lang-toggle{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#e9efef;border-radius:11px;padding:4px;min-width:164px}.resource-lang-toggle button{border:none;border-radius:8px;background:transparent;color:#4b5b62;padding:8px 10px;font-size:.78rem;font-weight:900;cursor:pointer}.resource-lang-toggle button.active{background:#fff;color:var(--accent2);box-shadow:0 1px 5px rgba(18,33,39,.12)}.resource-command{margin:0 0 12px;padding:12px 13px;border-radius:12px;background:#edf8f6;color:#163f3b;font-size:1rem;font-weight:850;line-height:1.35}.source-note{margin-top:10px;color:var(--muted);font-size:.72rem;line-height:1.4}
     .presentation{display:none;position:fixed;inset:0;z-index:2000;background:#050708;color:white}.presentation.show{display:block}.presentation-stage{width:100vw;height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;touch-action:pan-x pan-y pinch-zoom}.presentation-stage img{display:block;max-width:100vw;max-height:100dvh;width:auto;height:auto;object-fit:contain}.presentation-text{width:min(94vw,900px);max-height:100dvh;overflow:auto;padding:calc(58px + env(safe-area-inset-top)) 18px calc(30px + env(safe-area-inset-bottom));display:grid;gap:14px}.presentation-text .stimulus-line{background:white;color:#111;border-color:#ddd;font-size:clamp(1.35rem,4.8vw,2.5rem);text-align:center}.presentation-text .stimulus-line.word{font-size:clamp(1.7rem,6vw,3rem)}.presentation-close{position:fixed;z-index:3;top:calc(10px + env(safe-area-inset-top));right:12px;border:none;border-radius:999px;background:rgba(255,255,255,.94);color:#111;padding:10px 13px;font-weight:900;box-shadow:0 2px 14px rgba(0,0,0,.22)}.orientation-tip{position:fixed;z-index:2;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);background:rgba(0,0,0,.72);color:white;border-radius:999px;padding:8px 11px;font-size:.76rem;font-weight:800;white-space:nowrap;pointer-events:none;transition:opacity .25s}.orientation-tip.fade{opacity:0}
-    @media(max-width:560px){.grid{grid-template-columns:1fr}.grid .keep-two{grid-column:auto}.hero h1{font-size:1.75rem}.bp-grid{grid-template-columns:1fr 1fr}.resource-title{font-size:.86rem}.resource-btn{padding:9px 9px;font-size:.8rem}.lkw-wrap{grid-template-columns:1fr}.identity-grid{grid-template-columns:minmax(0,1fr) 82px}}
+    html[data-theme="dark"] label,html[data-theme="dark"] .setting-label,html[data-theme="dark"] .resource-language-label{color:var(--ink)}html[data-theme="dark"] .pill{background:var(--soft);color:var(--accent2)}html[data-theme="dark"] .segmented button,html[data-theme="dark"] .chip,html[data-theme="dark"] .small-btn,html[data-theme="dark"] .entry-row,html[data-theme="dark"] .nih-item select,html[data-theme="dark"] .tool-btn.secondary{background:var(--field);color:var(--ink)}html[data-theme="dark"] .segmented button.active,html[data-theme="dark"] .chip.active{background:var(--soft);color:var(--accent2)}html[data-theme="dark"] .details,html[data-theme="dark"] .spanish-panel{background:var(--subtle)}html[data-theme="dark"] .sticky-save{background:linear-gradient(180deg,rgba(13,21,24,0),rgba(13,21,24,.96) 22%,rgba(13,21,24,1))}html[data-theme="dark"] .confirm-card,html[data-theme="dark"] .resource-topbar,html[data-theme="dark"] .resource-card{background:var(--card)}html[data-theme="dark"] .resource-modal,html[data-theme="dark"] .resource-shell{background:var(--bg)}html[data-theme="dark"] .resource-lang-toggle{background:#26363c}html[data-theme="dark"] .resource-lang-toggle button.active{background:var(--card);color:var(--accent2)}html[data-theme="dark"] .stimulus-line{background:var(--field);color:var(--ink);border-color:var(--line)}html[data-theme="dark"] .resource-command{background:var(--soft);color:var(--ink)}html[data-theme="dark"] .confirm-cancel{background:#26363c;color:var(--ink)}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}.grid .keep-two{grid-column:auto}.hero h1{font-size:1.75rem}.bp-grid{grid-template-columns:1fr 1fr}.resource-title{font-size:.86rem}.resource-btn{padding:9px 9px;font-size:.8rem}.identity-grid{grid-template-columns:minmax(0,1fr) 82px}.vitals-row{grid-template-columns:minmax(0,.78fr) minmax(0,1.55fr)}.lkw-wrap{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) 62px;gap:5px}.lkw-wrap input,.lkw-wrap select{font-size:.78rem;padding:9px 5px}}
   </style>
 </head>
 <body>
@@ -71,9 +75,11 @@
   <section id="home" class="screen active">
     <div class="hero"><h1>Fast stroke-code logging.</h1><p>Capture key acute stroke data and NIHSS with minimal taps.</p></div>
     <div class="home-actions">
-      <button class="big-btn primary" type="button" onclick="startNewCode()"><span class="title">Start stroke code</span><span class="sub">Automatically timestamps the start</span></button>
-      <button class="big-btn secondary" type="button" onclick="showHistory()"><span class="title">Prior stroke codes</span><span class="sub">View saved entries on this device</span></button>
+      <div class="home-group"><div class="home-kicker">New</div><button class="big-btn primary" type="button" onclick="startNewCode()"><span class="title">Start stroke code</span><span class="sub">Creates and autosaves a new code immediately</span></button></div>
+      <div class="home-group"><div class="home-kicker">Active</div><button class="big-btn secondary" type="button" onclick="showInProgress()"><span class="title">In-progress stroke codes</span><span id="inProgressHomeSub" class="sub">Resume unfinished codes</span></button></div>
+      <div class="home-group"><div class="home-kicker">Completed</div><button class="big-btn secondary" type="button" onclick="showHistory()"><span class="title">Prior stroke codes</span><span id="priorHomeSub" class="sub">View completed codes on this device</span></button></div>
     </div>
+    <div class="home-settings"><button class="big-btn tertiary" type="button" onclick="showSettings()"><span class="title">Settings</span><span class="sub">Appearance and display options</span></button></div>
     <div id="fileModeWarning" class="storage-warning">You opened this as a local file. The app will use browser local storage and verifies each save, but persistence for <strong>file://</strong> pages is not standardized across browsers. For the most dependable iPhone + Android use, serve this exact single HTML file from a stable HTTPS address.</div>
     <div class="notice">Saved codes use persistent browser storage on this device and survive normal browser restarts. Do not use private/incognito browsing. Browser/site data can still be manually cleared, so this is not a substitute for the medical record. This app is not a HIPAA-compliant clinical record and should not be used for patient identifiers.</div>
     <div class="attribution">Stroke Code Logger · designed by Zack G.</div>
@@ -87,10 +93,6 @@
         <div><label for="nickname">Nickname <span style="font-weight:500;color:var(--muted)">(optional)</span></label><input id="nickname" maxlength="60" placeholder="e.g. ED 16 · posterior symptoms" autocomplete="off" /></div>
         <div><label for="age">Age</label><input id="age" inputmode="numeric" type="number" min="0" max="130" placeholder="Age" /></div>
       </div>
-      <div class="textarea-field" style="margin-bottom:12px">
-        <div class="textarea-head"><label for="hpi">HPI <span style="font-weight:500;color:var(--muted)">(optional)</span></label><button id="hpiDictateBtn" class="dictate-btn" type="button" onclick="startDictation('hpi','hpiDictateBtn')">🎙 Dictate</button></div>
-        <textarea id="hpi" class="auto-grow hpi-text" rows="3" placeholder="Relevant history / symptom timeline"></textarea>
-      </div>
       <div class="pmhx-block">
         <div class="pmhx-label-row"><label style="margin:0">Important PMHx <span style="font-weight:500;color:var(--muted)">(optional)</span></label><span>Tap all that apply</span></div>
         <div id="pmhxChips" class="chips">
@@ -98,9 +100,13 @@
         </div>
         <textarea id="pmhxOther" class="auto-grow" rows="1" maxlength="600" placeholder="Other important history" autocomplete="off"></textarea>
       </div>
-      <div class="grid" style="margin-top:14px">
-        <div><label for="glucose">Blood sugar (mg/dL)</label><input id="glucose" inputmode="numeric" type="number" min="0" placeholder="e.g. 112" /></div>
-        <div><label>Initial blood pressure (mmHg)</label><div class="bp-grid"><input id="sbp" inputmode="numeric" type="number" min="0" placeholder="SBP" aria-label="Systolic blood pressure" /><input id="dbp" inputmode="numeric" type="number" min="0" placeholder="DBP" aria-label="Diastolic blood pressure" /></div></div>
+      <div class="textarea-field" style="margin-top:12px">
+        <div class="textarea-head"><label for="hpi">HPI <span style="font-weight:500;color:var(--muted)">(optional)</span></label><button id="hpiDictateBtn" class="dictate-btn" type="button" onclick="toggleDictation('hpi','hpiDictateBtn')">🎙 Dictation off</button></div>
+        <textarea id="hpi" class="auto-grow hpi-text" rows="3" placeholder="Relevant history / symptom timeline"></textarea>
+      </div>
+      <div class="vitals-row">
+        <div><label for="glucose">Blood sugar</label><input id="glucose" inputmode="numeric" type="number" min="0" placeholder="mg/dL" /></div>
+        <div><label>Initial BP (mmHg)</label><div class="bp-grid"><input id="sbp" inputmode="numeric" type="number" min="0" placeholder="SBP" aria-label="Systolic blood pressure" /><input id="dbp" inputmode="numeric" type="number" min="0" placeholder="DBP" aria-label="Diastolic blood pressure" /></div></div>
       </div>
       <div class="subsection">
         <div class="subsection-head"><label>Repeat blood pressures <span style="font-weight:500;color:var(--muted)">(optional)</span></label><button class="add-row-btn" type="button" onclick="addRepeatBP()">+ Add BP</button></div>
@@ -129,7 +135,17 @@
 
   <section id="history" class="screen">
     <button class="back-btn" type="button" onclick="goHome()">← Home</button>
-    <div class="section-card"><div class="section-head"><div><h2 class="section-title">Prior stroke codes</h2><p class="section-sub">Saved locally in this browser on this device.</p></div></div><div id="historyList"></div></div>
+    <div class="section-card"><div class="section-head"><div><h2 id="historyTitle" class="section-title">Prior stroke codes</h2><p id="historySubtitle" class="section-sub">Completed codes saved locally on this device.</p></div></div><div id="historyList"></div></div>
+  </section>
+
+  <section id="settings" class="screen">
+    <button class="back-btn" type="button" onclick="goHome()">← Home</button>
+    <div class="section-card"><div class="section-head"><div><h2 class="section-title">Settings</h2><p class="section-sub">Stored locally on this device.</p></div></div>
+      <div class="settings-grid">
+        <div class="setting-row"><div class="setting-label">Appearance</div><div class="segmented three" id="themeSegment"><button type="button" data-theme-choice="system" onclick="setThemePreference('system')">System</button><button type="button" data-theme-choice="light" onclick="setThemePreference('light')">Light</button><button type="button" data-theme-choice="dark" onclick="setThemePreference('dark')">Dark</button></div><div class="setting-help">Dark mode applies to the logger, history, settings, and NIHSS resource screens.</div></div>
+        <div class="setting-row"><div class="setting-label">Text size</div><div class="segmented" id="textSizeSegment"><button type="button" data-text-size-choice="standard" onclick="setTextSizePreference('standard')">Standard</button><button type="button" data-text-size-choice="large" onclick="setTextSizePreference('large')">Large</button></div><div class="setting-help">Large slightly increases text throughout the app without changing your saved stroke-code data.</div></div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -150,6 +166,7 @@
 const STORAGE_KEY='strokeCodeLogger.records.v4';
 const LEGACY_DRAFT_KEY='strokeCodeLogger.activeDraft.v1';
 const LEGACY_KEY='strokeCodes';
+const SETTINGS_KEY='strokeCodeLogger.settings.v1';
 const NINDS_PDF='https://www.ninds.nih.gov/sites/default/files/2025-03/KnowStroke_NIHStrokeScale_March2025_508c.pdf';
 const IMAGE_URLS={
   scene:'https://static.wixstatic.com/media/69387f_b898656ccda94c4d9ed9d410a06a45a1~mv2.png/v1/fill/w_600%2Ch_454%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/best-language-image-1-tiny.png',
@@ -197,7 +214,7 @@ const RESOURCE_COMMAND={
   en:{scene:'Tell me what is happening in this picture.',objects:'Name these objects.',sentences:'Read these sentences out loud.',words:'Read these words out loud.'},
   es:{scene:'Dígame qué pasa en esta imagen.',objects:'Nombre estos objetos.',sentences:'Lea estas frases en voz alta.',words:'Lea estas palabras en voz alta.'}
 };
-let currentStart=null,acap='No',currentResource=null,resourceLanguage='en',orientationTimer=null,currentRecordId=null,currentEditingId=null,currentRecordStatus='complete',pendingDeleteId=null,toastTimer=null,autosaveTimer=null,suppressAutosave=false,activeRecognition=null;
+let currentStart=null,acap='No',currentResource=null,resourceLanguage='en',orientationTimer=null,currentRecordId=null,currentEditingId=null,currentRecordStatus='complete',pendingDeleteId=null,toastTimer=null,autosaveTimer=null,suppressAutosave=false,activeRecognition=null,dictationEnabled=false,dictationTargetId=null,dictationButtonId=null,dictationRestartTimer=null,historyFilter='complete';
 const qs=id=>document.getElementById(id);
 const safe=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 function showToast(message,type='success',duration=1800){
@@ -211,7 +228,19 @@ function updateRecordStatusBadge(){
 }
 function fmt(dt){return new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).format(dt)}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));qs(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
-function goHome(){if(qs('logger').classList.contains('active'))saveActiveRecordNow();showScreen('home')}
+function refreshHomeSummary(){
+  const records=loadRecords(),active=records.filter(r=>r.status==='inProgress').length,complete=records.filter(r=>r.status!=='inProgress').length;
+  if(qs('inProgressHomeSub'))qs('inProgressHomeSub').textContent=active?`${active} unfinished code${active===1?'':'s'} · tap to resume`:'No unfinished codes';
+  if(qs('priorHomeSub'))qs('priorHomeSub').textContent=complete?`${complete} completed code${complete===1?'':'s'} on this device`:'No completed codes yet'
+}
+function goHome(){if(qs('logger').classList.contains('active'))saveActiveRecordNow();stopDictation();refreshHomeSummary();showScreen('home')}
+function loadSettings(){try{return {...{theme:'system',textSize:'standard'},...(JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')||{})}}catch(e){return {theme:'system',textSize:'standard'}}}
+function resolveTheme(pref){return pref==='system'?(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):pref}
+function applySettings(){const st=loadSettings(),resolved=resolveTheme(st.theme);document.documentElement.dataset.theme=resolved;document.documentElement.dataset.textSize=st.textSize==='large'?'large':'standard';document.querySelectorAll('[data-theme-choice]').forEach(b=>b.classList.toggle('active',b.dataset.themeChoice===st.theme));document.querySelectorAll('[data-text-size-choice]').forEach(b=>b.classList.toggle('active',b.dataset.textSizeChoice===st.textSize));const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=resolved==='dark'?'#0d1518':'#0f766e'}
+function saveSettings(patch){const next={...loadSettings(),...patch};try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(next))}catch(e){}applySettings()}
+function setThemePreference(theme){if(!['system','light','dark'].includes(theme))return;saveSettings({theme})}
+function setTextSizePreference(textSize){if(!['standard','large'].includes(textSize))return;saveSettings({textSize})}
+function showSettings(){applySettings();showScreen('settings')}
 function storageAvailable(){try{const k='__stroke_storage_test__';localStorage.setItem(k,'1');localStorage.removeItem(k);return true}catch(e){return false}}
 function newRecordId(){return (typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():`stroke-${Date.now()}-${Math.random().toString(36).slice(2,10)}`}
 function recordFreshness(r){
@@ -320,13 +349,26 @@ function lkwLegacyValue(){const date=qs('lkwDate').value,h=qs('lkwHour').value,m
 function lkwDisplay(r){
   const p=lkwPartsFromRecord(r);if(!(p.date||p.hour||p.minute||p.period))return 'Not entered';let day=p.date;if(p.date){const [y,m,d]=p.date.split('-').map(Number);try{day=new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric',year:'numeric'}).format(new Date(y,m-1,d))}catch(e){}}const time=(p.hour||p.minute)?`${p.hour||'—'}:${p.minute||'—'}${p.period?` ${p.period}`:''}`:'';return [day,time].filter(Boolean).join(' · ')
 }
-function startDictation(targetId,buttonId){
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;const target=qs(targetId),btn=qs(buttonId);if(!target)return;
-  if(!SpeechRecognition){showToast('Voice dictation is not available in this browser. You can use the microphone on the phone keyboard.','error',4200);target.focus();return}
-  if(activeRecognition){try{activeRecognition.stop()}catch(e){}activeRecognition=null}
-  const rec=new SpeechRecognition();activeRecognition=rec;rec.lang='en-US';rec.continuous=false;rec.interimResults=true;let base=target.value.trim();btn?.classList.add('listening');if(btn)btn.textContent='● Listening';
-  rec.onresult=e=>{let transcript='';for(let i=e.resultIndex;i<e.results.length;i++)transcript+=e.results[i][0].transcript;target.value=[base,transcript.trim()].filter(Boolean).join(base?' ':'');autoGrow(target);scheduleRecordAutosave()};
-  rec.onerror=()=>showToast('Could not start voice dictation','error',2600);rec.onend=()=>{activeRecognition=null;btn?.classList.remove('listening');if(btn)btn.textContent='🎙 Dictate';scheduleRecordAutosave()};try{rec.start()}catch(e){rec.onend();showToast('Could not start voice dictation','error',2600)}
+function updateDictationButton(){
+  const btn=dictationButtonId?qs(dictationButtonId):null;if(!btn)return;btn.classList.toggle('listening',dictationEnabled);btn.textContent=dictationEnabled?'● Dictation on':'🎙 Dictation off'
+}
+function stopDictation(){
+  dictationEnabled=false;clearTimeout(dictationRestartTimer);dictationRestartTimer=null;if(activeRecognition){try{activeRecognition.stop()}catch(e){}activeRecognition=null}updateDictationButton()
+}
+function startRecognitionCycle(){
+  if(!dictationEnabled||!dictationTargetId||!qs('logger').classList.contains('active'))return;
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition,target=qs(dictationTargetId);if(!SpeechRecognition||!target){stopDictation();return}
+  const rec=new SpeechRecognition();activeRecognition=rec;rec.lang='en-US';rec.continuous=true;rec.interimResults=true;const base=target.value.trim();let finals='';
+  rec.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const text=e.results[i][0].transcript.trim();if(e.results[i].isFinal)finals=[finals,text].filter(Boolean).join(' ');else interim=[interim,text].filter(Boolean).join(' ')}target.value=[base,finals,interim].filter(Boolean).join(' ');autoGrow(target);scheduleRecordAutosave()};
+  rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'||e.error==='audio-capture'){showToast('Dictation microphone access is unavailable','error',3200);stopDictation()}};
+  rec.onend=()=>{if(activeRecognition===rec)activeRecognition=null;scheduleRecordAutosave();if(dictationEnabled){clearTimeout(dictationRestartTimer);dictationRestartTimer=setTimeout(startRecognitionCycle,180)}else updateDictationButton()};
+  try{rec.start()}catch(e){activeRecognition=null;if(dictationEnabled){clearTimeout(dictationRestartTimer);dictationRestartTimer=setTimeout(startRecognitionCycle,350)}}
+}
+function toggleDictation(targetId,buttonId){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition,target=qs(targetId);if(!target)return;
+  if(dictationEnabled){stopDictation();showToast('Dictation off');return}
+  if(!SpeechRecognition){showToast('Browser dictation is unavailable. Use the microphone on your phone keyboard.','error',4200);target.focus();return}
+  dictationEnabled=true;dictationTargetId=targetId;dictationButtonId=buttonId;updateDictationButton();startRecognitionCycle()
 }
 function renderNIH(){
   qs('nihContainer').innerHTML=NIH_ITEMS.map(item=>{
@@ -342,7 +384,7 @@ function toggleSpanish(itemId){
   panel.classList.toggle('show',opening)
 }
 function resetLoggerForm(){
-  suppressAutosave=true;qs('nickname').value='';qs('age').value='';qs('hpi').value='';autoGrow(qs('hpi'));resetPMHx();qs('glucose').value='';qs('sbp').value='';qs('dbp').value='';qs('lkwDate').value='';qs('lkwHour').value='';qs('lkwMinute').value='';qs('lkwPeriod').value='';renderRepeatBPs([]);renderMedicationRows([]);setAcap('No');renderNIH();updateNIH();suppressAutosave=false
+  stopDictation();suppressAutosave=true;qs('nickname').value='';qs('age').value='';qs('hpi').value='';autoGrow(qs('hpi'));resetPMHx();qs('glucose').value='';qs('sbp').value='';qs('dbp').value='';qs('lkwDate').value='';qs('lkwHour').value='';qs('lkwMinute').value='';qs('lkwPeriod').value='';renderRepeatBPs([]);renderMedicationRows([]);setAcap('No');renderNIH();updateNIH();suppressAutosave=false
 }
 function collectFormRecord(id){
   const nih={};let total=0;NIH_ITEMS.forEach(item=>{const score=Number(qs(`nih-${item.id}`).value||0);total+=score;nih[item.id]={score,label:item.name}});
@@ -350,7 +392,7 @@ function collectFormRecord(id){
   return {id,startedAt:currentStart?currentStart.toISOString():new Date().toISOString(),nickname:qs('nickname').value.trim(),age:qs('age').value.trim(),hpi:qs('hpi').value.trim(),pmhx:selectedPMHx(),pmhxOther:qs('pmhxOther').value.trim(),glucose:qs('glucose').value.trim(),sbp,dbp,bp:(sbp||dbp)?`${sbp||'—'}/${dbp||'—'}`:'',repeatBPs:getRepeatBPs(),lkwDate:qs('lkwDate').value,lkwHour:qs('lkwHour').value,lkwMinute:qs('lkwMinute').value,lkwPeriod:qs('lkwPeriod').value,lkw:lkwLegacyValue(),acap,acapMeds:meds,acapDrug:meds[0]?.drug||'',lastDose:meds[0]?.lastDose||'',nih,nihTotal:total,status:currentRecordStatus}
 }
 function populateLogger(r,editing=false){
-  suppressAutosave=true;currentRecordId=String(r.id||newRecordId());currentEditingId=editing?currentRecordId:null;currentRecordStatus=r.status||'complete';currentStart=new Date(r.startedAt||Date.now());setLoggerMode(editing);qs('startedDisplay').textContent=fmt(currentStart);qs('nickname').value=r.nickname||'';qs('age').value=r.age||'';qs('hpi').value=r.hpi||'';autoGrow(qs('hpi'));
+  stopDictation();suppressAutosave=true;currentRecordId=String(r.id||newRecordId());currentEditingId=editing?currentRecordId:null;currentRecordStatus=r.status||'complete';currentStart=new Date(r.startedAt||Date.now());setLoggerMode(editing);qs('startedDisplay').textContent=fmt(currentStart);qs('nickname').value=r.nickname||'';qs('age').value=r.age||'';qs('hpi').value=r.hpi||'';autoGrow(qs('hpi'));
   const legacyBP=(!r.sbp&&!r.dbp&&typeof r.bp==='string')?r.bp.split('/'):[];document.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active',Array.isArray(r.pmhx)&&r.pmhx.includes(b.dataset.pmhx)));qs('pmhxOther').value=r.pmhxOther||'';autoGrow(qs('pmhxOther'));qs('glucose').value=r.glucose||'';qs('sbp').value=r.sbp||legacyBP[0]||'';qs('dbp').value=r.dbp||legacyBP[1]||'';
   const lkw=lkwPartsFromRecord(r);qs('lkwDate').value=lkw.date;qs('lkwHour').value=lkw.hour;qs('lkwMinute').value=lkw.minute;qs('lkwPeriod').value=lkw.period;renderRepeatBPs(Array.isArray(r.repeatBPs)?r.repeatBPs:[]);renderMedicationRows(normalizeMeds(r));setAcap(r.acap==='Yes'?'Yes':'No');
   renderNIH();NIH_ITEMS.forEach(item=>{const el=qs(`nih-${item.id}`);if(el)el.value=String(r.nih?.[item.id]?.score??0)});updateNIH();suppressAutosave=false;showScreen('logger');updateRecordStatusBadge()
@@ -360,12 +402,15 @@ function startNewCode(){
 }
 function editRecord(id){const r=loadRecords().find(x=>String(x.id)===String(id));if(!r){showToast('Saved code not found','error',2600);return}populateLogger(r,true)}
 async function saveCode(){
-  if(!currentRecordId){showToast('Stroke code could not be identified','error',3200);return}const wasEditing=currentEditingId!==null,existing=loadRecords().find(r=>String(r.id)===String(currentRecordId));currentRecordStatus='complete';const record=collectFormRecord(String(currentRecordId));record.status='complete';record.updatedAt=new Date().toISOString();record.completedAt=existing?.completedAt||new Date().toISOString();if(wasEditing)record.editedAt=new Date().toISOString();
-  if(!upsertRecord(record)){showToast('Could not save stroke code','error',4000);return}currentRecordId=null;currentEditingId=null;currentStart=null;currentRecordStatus='complete';await requestPersistentStorage();await updateStorageUI();showHistory();showToast(wasEditing?'Stroke code updated':'Stroke code saved')
+  stopDictation();if(!currentRecordId){showToast('Stroke code could not be identified','error',3200);return}const wasEditing=currentEditingId!==null,existing=loadRecords().find(r=>String(r.id)===String(currentRecordId));currentRecordStatus='complete';const record=collectFormRecord(String(currentRecordId));record.status='complete';record.updatedAt=new Date().toISOString();record.completedAt=existing?.completedAt||new Date().toISOString();if(wasEditing)record.editedAt=new Date().toISOString();
+  if(!upsertRecord(record)){showToast('Could not save stroke code','error',4000);return}currentRecordId=null;currentEditingId=null;currentStart=null;currentRecordStatus='complete';await requestPersistentStorage();await updateStorageUI();refreshHomeSummary();showHistory('complete');showToast(wasEditing?'Stroke code updated':'Stroke code saved')
 }
 function bpDisplay(r){if(r.sbp||r.dbp)return `${r.sbp||'—'}/${r.dbp||'—'}`;return r.bp||'—'}
-function showHistory(){
-  const records=loadRecords(),list=qs('historyList');if(!records.length){list.innerHTML='<div class="empty">No stroke codes saved yet.</div>';showScreen('history');return}
+function showInProgress(){showHistory('inProgress')}
+function showHistory(filter='complete'){
+  historyFilter=filter;const all=loadRecords(),records=all.filter(r=>filter==='inProgress'?r.status==='inProgress':r.status!=='inProgress'),list=qs('historyList'),isActive=filter==='inProgress';
+  qs('historyTitle').textContent=isActive?'In-progress stroke codes':'Prior stroke codes';qs('historySubtitle').textContent=isActive?'Autosaved unfinished codes. Resume any code to continue logging.':'Completed codes saved locally on this device.';
+  if(!records.length){list.innerHTML=`<div class="empty">${isActive?'No in-progress stroke codes.':'No completed stroke codes yet.'}</div>`;showScreen('history');return}
   list.innerHTML=records.map(r=>{
     const lkw=lkwDisplay(r),bp=bpDisplay(r),history=[...(Array.isArray(r.pmhx)?r.pmhx:[]),r.pmhxOther].filter(Boolean).join(', ')||'—',meds=normalizeMeds(r),repeats=Array.isArray(r.repeatBPs)?r.repeatBPs:[];
     const medLines=meds.length?meds.map((m,i)=>`\n${meds.length>1?`Medication ${i+1}: `:'Drug: '}${m.drug||'—'}\nLast dose: ${m.lastDose||'—'}`).join(''):'';
@@ -383,7 +428,7 @@ function deleteRecord(id){
 function closeDeleteConfirm(){pendingDeleteId=null;qs('deleteConfirm').classList.remove('show')}
 function confirmDelete(){
   if(!pendingDeleteId){closeDeleteConfirm();return}
-  const id=pendingDeleteId,records=loadRecords().filter(r=>r.id!==id);if(!writeRecords(records)){closeDeleteConfirm();showToast('Could not delete stroke code','error',3500);return}closeDeleteConfirm();showHistory();showToast('Stroke code deleted')
+  const id=pendingDeleteId,records=loadRecords().filter(r=>r.id!==id);if(!writeRecords(records)){closeDeleteConfirm();showToast('Could not delete stroke code','error',3500);return}closeDeleteConfirm();refreshHomeSummary();showHistory(historyFilter);showToast('Stroke code deleted')
 }
 function resourceTitle(type){return {scene:'Best language — scene',objects:'Best language — object naming',sentences:'Best language — sentences',words:'Dysarthria — word list'}[type]||'NIHSS resource'}
 function resourceOrientation(type){return type==='scene'?'landscape':'portrait'}
@@ -416,7 +461,7 @@ function setResourceLanguage(lang){
   if(qs('presentation').classList.contains('show'))renderPresentationStage()
 }
 function openNIHResource(type){
-  currentResource=type;resourceLanguage='en';qs('resourceTitle').textContent=resourceTitle(type);renderResourceBody();qs('resourceModal').classList.add('show');document.body.classList.add('modal-open')
+  stopDictation();currentResource=type;resourceLanguage='en';qs('resourceTitle').textContent=resourceTitle(type);renderResourceBody();qs('resourceModal').classList.add('show');document.body.classList.add('modal-open')
 }
 function closeNIHResource(){exitPresentation(true);qs('resourceModal').classList.remove('show');document.body.classList.remove('modal-open')}
 function renderPresentationStage(){
@@ -442,11 +487,11 @@ function exitPresentation(skipFullscreenExit=false){
 document.querySelectorAll('.chip').forEach(btn=>btn.addEventListener('click',()=>{btn.classList.toggle('active');scheduleRecordAutosave()}));
 document.addEventListener('input',e=>{if(e.target.matches('textarea.auto-grow'))autoGrow(e.target);if(e.target.closest('#logger'))scheduleRecordAutosave()});
 document.addEventListener('change',e=>{if(e.target.closest('#logger'))scheduleRecordAutosave()});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&qs('logger').classList.contains('active'))saveActiveRecordNow()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&qs('logger').classList.contains('active')){saveActiveRecordNow();stopDictation()}});
 window.addEventListener('pagehide',()=>{if(qs('logger').classList.contains('active'))saveActiveRecordNow()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(qs('presentation').classList.contains('show'))exitPresentation();else if(qs('resourceModal').classList.contains('show'))closeNIHResource();else if(qs('deleteConfirm').classList.contains('show'))closeDeleteConfirm()}});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&qs('presentation').classList.contains('show')){/* keep CSS full-viewport fallback active */}});
-initLkwControls();migrateLegacyDraft();renderNIH();updateNIH();updateStorageUI();
+initLkwControls();migrateLegacyDraft();applySettings();renderNIH();updateNIH();updateStorageUI();refreshHomeSummary();if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');const fn=()=>{if(loadSettings().theme==='system')applySettings()};try{mq.addEventListener('change',fn)}catch(e){try{mq.addListener(fn)}catch(_){}}}
 </script>
 </body>
 </html>
