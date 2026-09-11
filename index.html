@@ -446,7 +446,7 @@ function renderResourceBody(){
   const command=RESOURCE_COMMAND[resourceLanguage][currentResource];
   if(currentResource==='scene'||currentResource==='objects'){
     const alt=currentResource==='scene'?'NIHSS scene description stimulus':'NIHSS object naming stimulus';
-    content+=`<div class="resource-card"><div class="resource-command">${safe(command)}</div><img class="resource-img" src="${IMAGE_URLS[currentResource]}" alt="${alt}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/><div style="display:none" class="warning">The image could not be loaded. Internet access is required for this image in this standalone file.</div><p class="resource-hint">Tap <strong>Full screen</strong>. ${currentResource==='scene'?'This card is best viewed with the phone sideways.':'This card is best viewed upright.'}</p>${resourceSourceNote()}</div>`;
+    content+=`<div class="resource-card"><div class="resource-command">${safe(command)}</div><img class="resource-img" src="${IMAGE_URLS[currentResource]}" alt="${alt}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/><div style="display:none" class="warning">The image could not be loaded. The image is not available offline yet. Open the app once while connected so offline resources can finish caching.</div><p class="resource-hint">Tap <strong>Full screen</strong>. ${currentResource==='scene'?'This card is best viewed with the phone sideways.':'This card is best viewed upright.'}</p>${resourceSourceNote()}</div>`;
   }else{
     const key=currentResource==='words'?'words':'sentences',isWord=currentResource==='words';
     const items=RESOURCE_TEXT[resourceLanguage][key];
@@ -492,6 +492,16 @@ window.addEventListener('pagehide',()=>{if(qs('logger').classList.contains('acti
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(qs('presentation').classList.contains('show'))exitPresentation();else if(qs('resourceModal').classList.contains('show'))closeNIHResource();else if(qs('deleteConfirm').classList.contains('show'))closeDeleteConfirm()}});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&qs('presentation').classList.contains('show')){/* keep CSS full-viewport fallback active */}});
 initLkwControls();migrateLegacyDraft();applySettings();renderNIH();updateNIH();updateStorageUI();refreshHomeSummary();if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');const fn=()=>{if(loadSettings().theme==='system')applySettings()};try{mq.addEventListener('change',fn)}catch(e){try{mq.addListener(fn)}catch(_){}}}
+
+// Offline-first PWA: cache the app shell and NIHSS visual resources after the first online load.
+if('serviceWorker' in navigator){
+  window.addEventListener('load',async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('./service-worker.js',{scope:'./'});
+      try{await reg.update()}catch(_){}
+    }catch(e){console.warn('Offline service worker registration failed',e)}
+  })
+}
 </script>
 </body>
 </html>
